@@ -39,7 +39,34 @@ class OSMInfo:
         url = f'https://api.openstreetmap.org/api/0.6/map?bbox={lon},{lat},{lon+grid_size},{lat+grid_size}'
         r = requests.get(url)
         soup = BeautifulSoup(r.text, 'xml')
-        return soup.find_all('way')
+        ways = soup.find_all('way')
+        return ways 
+
+    def divide_ways_by_three_classes(self, way_bs4):
+        class1 = ['motorway', 'trunk', 'motorway_link', 'trunk_link']
+        class2 = ['primary', 'secondary', 'tertiary', 'primary_link', 'secondary_link', 'tertiary_link']
+        ret1, ret2, ret3 = [], [], []
+        for way in way_bs4:
+            if way.find('tag'):
+                if way.tag['v'] in class1:
+                    ret1.append(way)
+                elif way.tag['v'] in class2:
+                    ret2.append(way)
+                else:
+                    ret3.append(way)
+        return ret1, ret2, ret3
+
+    def get_roadnetwork_grid_data(self, ways):
+        freeway, common, others = self.divide_ways_by_three_classes(ways) 
+        # freeway
+        len_rf, len_rc, len_ro = 0.0, 0.0, 0.0
+        for wf in tqdm(freeway):
+            len_rf += self.get_way_length(wf)
+        for wc in tqdm(common):
+            len_rc += self.get_way_length(wc)
+        for wo in tqdm(others):
+            len_ro += self.get_way_length(wo)
+        return (len_rf, len_rc, len_ro)
 
     @staticmethod
     def latlon_distance(lon1:float, lat1:float, lon2:float, lat2:float) -> float:
@@ -58,7 +85,10 @@ class OSMInfo:
 if __name__ == '__main__':
     osm = OSMInfo()
     d = osm.latlon_distance(50.0359, 5.4253, 58.3838, 3.0412)
-    ways = osm.get_ways_by_grid(120.98, 24.81, 0.01)
-    for w in tqdm(ways):
-        d = osm.get_way_length(w)
-        print(d)
+    ways = osm.get_ways_by_grid(121.73, 24.77, 0.01)
+    pp(ways)
+    d = osm.get_roadnetwork_grid_data(ways)
+    pp(d)
+    #  for w in tqdm(ways):
+        #  d = osm.get_way_length(w)
+        #  print(d)
