@@ -20,10 +20,12 @@ class OSMInfo:
         return float(lat), float(lon)
 
     def get_way_length(self, way_bs4):
-        length = 0.0
         nds = way_bs4.find_all('nd')
         nds = [ n['ref'] for n in nds ]
-        latlon = [ self.get_node_latlon(nd) for nd in nds ]
+        p = mp.Pool(8)
+        latlon = p.map(self.get_node_latlon, nds)
+        p.close()
+        p.join()
 
         # multiprocessing
         arg_index = [[*(latlon[index]), *(latlon[index+1])] for index in range(len(latlon) - 1)]
