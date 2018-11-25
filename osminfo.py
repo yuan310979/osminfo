@@ -63,8 +63,8 @@ class OSMInfo:
             ret[nd['id']] = [ float(nd['lat']), float(nd['lon']) ]
         return ret
 
-    def get_roadnetwork_grid_data(self, lat, lon, step):
-        nodes, ways = self.get_elements_by_grid(121.73, 24.77, 0.01)
+    def get_roadnetwork_grid_data(self, lon, lat, step):
+        nodes, ways = self.get_elements_by_grid(lon, lat, 0.01)
         self.nd_latlon = self.build_nodes_data(nodes)
         freeway, common, others = self.divide_ways_by_three_classes(ways) 
 
