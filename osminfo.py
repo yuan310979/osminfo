@@ -25,17 +25,14 @@ class OSMInfo:
     def get_way_length(self, way_bs4):
         nds = way_bs4.find_all('nd')
         nds = [ n['ref'] for n in nds ]
-        latlon = [ self.nd_latlon[id] for id in nds ]
+        if len(nds) > 1:
+            latlon = [ self.nd_latlon[id] for id in nds ]
+            result_list = [self.latlon_distance(latlon[i][0], latlon[i][1], latlon[i+1][0], latlon[i+1][1]) for i in range(len(latlon)-1)]
+            return sum(result_list) 
+        else:
+            return 0.0
 
-        # multiprocessing
-        arg_index = [[*(latlon[index]), *(latlon[index+1])] for index in range(len(latlon) - 1)]
-        p = mp.Pool(8)
-        result_list = p.starmap(self.latlon_distance, arg_index) 
-        p.close()
-        p.join()
-        return sum(result_list) 
-
-    def get_elements_by_grid(self, lon:float, lat:float, grid_size:float=0.01):
+    def get_elements_by_grid(self, lat:float, lon:float, grid_size:float=0.01):
         url = f'https://api.openstreetmap.org/api/0.6/map?bbox={lon},{lat},{lon+grid_size},{lat+grid_size}'
         r = requests.get(url)
         soup = BeautifulSoup(r.text, 'xml')
@@ -63,8 +60,8 @@ class OSMInfo:
             ret[nd['id']] = [ float(nd['lat']), float(nd['lon']) ]
         return ret
 
-    def get_roadnetwork_grid_data(self, lon, lat, step):
-        nodes, ways = self.get_elements_by_grid(lon, lat, 0.01)
+    def get_roadnetwork_grid_data(self, lat, lon, step):
+        nodes, ways = self.get_elements_by_grid(lat, lon, 0.01)
         self.nd_latlon = self.build_nodes_data(nodes)
         freeway, common, others = self.divide_ways_by_three_classes(ways) 
 
@@ -79,7 +76,7 @@ class OSMInfo:
         return (len_rf, len_rc, len_ro)
 
     @staticmethod
-    def latlon_distance(lon1:float, lat1:float, lon2:float, lat2:float) -> float:
+    def latlon_distance(lat1:float, lon1:float, lat2:float, lon2:float) -> float:
         # Ref: https://www.movable-type.co.uk/scripts/latlong.html 
         R = 6371.0
         phi1 = radians(lat1)
