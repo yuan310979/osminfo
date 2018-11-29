@@ -22,14 +22,12 @@ lat_range = 0.1
 step = 0.01
 """
 
-road_data = {}
-#grids = None
+grids = {}
 
 osm = OSMInfo()
 
 keys = product(np.arange(0, lat_range,step) + start_lat, np.arange(0, lon_range, step) + start_lon)
 keys = [(round(key[0], 2), round(key[1], 2)) for key in keys]
-#args = [(round(key[0], 2), round(key[1], 2), step) for key in keys]
 
 """
 with mp.Pool(16) as p:
@@ -43,15 +41,16 @@ for key, data in zip(keys, grids):
 """
 
 for key in tqdm(keys):
-    road_data[key] = osm.get_roadnetwork_grid_data(key[0], key[1], step)
+    grids[key] = osm.get_full_grid_data(key[0], key[1], step)
     
-data_path = Path('./data/')
-road_data_path = data_path / 'road_network.pickle'
+data_path = Path('../raw_data/')
+pickle_data_path = Path('../pickle_data/')
+TW_data_path = pickle_data_path / 'TW_grids_full.pickle'
 
-if not data_path.exists():
-    data_path.mkdir()
+if not pickle_data_path.exists():
+    pickle_data_path.mkdir()
 
-road_data_path.write_bytes(pickle.dumps(road_data))
+TW_data_path.write_bytes(pickle.dumps(grids))
 
 """
 d = pickle.load(road_data_path.open('rb'))

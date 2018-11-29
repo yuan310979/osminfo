@@ -38,7 +38,8 @@ class OSMInfo:
         soup = BeautifulSoup(r.text, 'xml')
         nodes = soup.find_all('node')
         ways = soup.find_all('way')
-        return nodes, ways 
+        relations = soup.find_all('relation')
+        return nodes, ways, relations 
 
     def divide_ways_by_three_classes(self, way_bs4):
         class1 = ['motorway', 'trunk', 'motorway_link', 'trunk_link']
@@ -61,7 +62,7 @@ class OSMInfo:
         return ret
 
     def get_roadnetwork_grid_data(self, lat, lon, step):
-        nodes, ways = self.get_elements_by_grid(lat, lon, 0.01)
+        nodes, ways, relations = self.get_elements_by_grid(lat, lon, step)
         self.nd_latlon = self.build_nodes_data(nodes)
         freeway, common, others = self.divide_ways_by_three_classes(ways) 
 
@@ -74,6 +75,56 @@ class OSMInfo:
         for wo in tqdm(others):
             len_ro += self.get_way_length(wo)
         return (len_rf, len_rc, len_ro)
+
+    def get_nodes_full_data(self, nodes):
+        ret = {}
+        for n in nodes:
+            tmp_node = {'lon': n['lon'], 'lat': n['lat']} 
+            tags = n.find_all('tag')
+            tag_dict = {} 
+            for t in tags:
+               tag_dict[t['k']] = t['v'] 
+            tmp_node['tag'] = tag_dict
+            ret[n['id']] = tmp_node 
+        return ret
+
+    def get_ways_full_data(self, ways):
+        ret = {}
+        for w in ways:
+            tag_dict = {}
+            for t in w.find_all('tag'):
+               tag_dict[t['k']] = t['v'] 
+            node_list = [ n['ref'] for n in w.find_all('nd') ]
+            ret[w['id']] = {'tag': tag_dict, 'node': node_list}
+        return ret
+
+    def get_relation_full_data(self, relations):
+        ret = {}
+        for r in relations:
+            tag_dict = {}
+            for t in r.find_all('tag'):
+               tag_dict[t['k']] = t['v'] 
+
+            node_list = []
+            way_list = []
+            relation_list = []
+            for m in r.find_all('member'):
+                m_type = m['type']
+                if m_type == 'node':
+                    node_list.append(m['ref'])
+                elif m_type == 'way':
+                    way_list.append(m['ref'])
+                elif m_type == 'relation':
+                    relation_list.append(m['ref'])
+            ret[r['id']] = {'tag': tag_dict, 'node': node_list, 'way': way_list, 'relation': relation_list}
+        return ret
+
+    def get_full_grid_data(self, lat, lon, step):
+        nodes, ways, relations = self.get_elements_by_grid(lat, lon, step)
+        nodes = self.get_nodes_full_data(nodes)
+        ways =  self.get_ways_full_data(ways)
+        relations = self.get_relation_full_data(relations)
+        return {'node': nodes, 'way': ways, 'relation': relations}
 
     @staticmethod
     def latlon_distance(lat1:float, lon1:float, lat2:float, lon2:float) -> float:
