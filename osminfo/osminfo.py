@@ -7,11 +7,14 @@ from bs4 import BeautifulSoup
 from math import sin, cos, sqrt, atan2, radians
 from pprint import pprint as pp
 from typing import Tuple
+from time import sleep
 
 class OSMInfo:
 
     def __init__(self):
         self.nd_latlon = None
+        self.error_keys = []
+        self.logf = open("./log/error_log", 'w')
 
     """
     def get_node_latlon(self, node_id: str) -> Tuple[float, float]:
@@ -33,8 +36,18 @@ class OSMInfo:
             return 0.0
 
     def get_elements_by_grid(self, lat:float, lon:float, grid_size:float=0.01):
+        assert lat <= 90 and lat >= -90 and lon <= 180 and lon >= -180
         url = f'https://api.openstreetmap.org/api/0.6/map?bbox={lon},{lat},{lon+grid_size},{lat+grid_size}'
-        r = requests.get(url)
+
+        try:
+            r = requests.get(url)
+        except Exception as e:
+            self.logf.write(url + '\n')
+            self.error_keys.append((lat, lon))
+            sleep(10)
+            print(url)
+            return [], [], []
+
         soup = BeautifulSoup(r.text, 'xml')
         nodes = soup.find_all('node')
         ways = soup.find_all('way')
