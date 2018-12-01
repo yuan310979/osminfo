@@ -1,5 +1,6 @@
 import requests
 import re
+import pickle
 import multiprocessing as mp
 
 from tqdm import tqdm
@@ -8,6 +9,7 @@ from math import sin, cos, sqrt, atan2, radians
 from pprint import pprint as pp
 from typing import Tuple
 from time import sleep
+from pathlib import Path
 
 class OSMInfo:
 
@@ -15,6 +17,16 @@ class OSMInfo:
         self.nd_latlon = None
         self.error_keys = []
         self.logf = open("./log/error_log", 'w')
+        self.osm_data = None
+
+    def read_osm_from_pickle(self, path):
+        path = Path(path)
+        self.osm_data = pickle.load(path.open('rb'))
+
+    def get_nearest_grid(self, lat, lon):
+        lat = round(lat, 2)
+        lon = round(lon, 2)
+        return self.osm_data[(lat, lon)]
 
     """
     def get_node_latlon(self, node_id: str) -> Tuple[float, float]:
@@ -155,6 +167,8 @@ class OSMInfo:
 
 if __name__ == '__main__':
     osm = OSMInfo()
-    d = osm.latlon_distance(50.0359, 5.4253, 58.3838, 3.0412)
-    d = osm.get_roadnetwork_grid_data(120.90, 25.00, 0.01)
+    #  d = osm.latlon_distance(50.0359, 5.4253, 58.3838, 3.0412)
+    #  d = osm.get_roadnetwork_grid_data(120.90, 25.00, 0.01)
+    osm.read_osm_from_pickle('../pickle_data/TW_grids_full.pickle')
+    d = osm.get_nearest_grid(lat=23.432342342, lon=121.12112)
     pp(d)
