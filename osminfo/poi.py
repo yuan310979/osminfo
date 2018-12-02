@@ -1,9 +1,8 @@
-import pickle
-
-from pathlib import Path
-
 class POI:
-
+    """
+    describe POI classes in 12 types.
+    and provide function to transform all the record into dict.
+    """
     def __init__(self):
         # C1: Vehicle Survice
         self.class1 =   [
@@ -408,21 +407,3 @@ class POI:
         for c12 in self.class12:
             ret[c12] = 12
         return ret
-
-    def save_pickle(self, path, obj):
-        path = Path(path)
-        if not path.parent.exists():
-            path.parent.mkdir()
-        path.write_bytes(pickle.dumps(obj))
-
-    def load_pickle(self, path):
-        path = Path(path)
-        return pickle.load(path.open('rb'))
-
-if __name__ == '__main__':
-    path = '../pickle_data/poi_mapping_dict.pickle'
-
-    poi = POI()
-    d = poi.trans_poi_class_to_dict()
-
-    poi.save_pickle(path, d)
