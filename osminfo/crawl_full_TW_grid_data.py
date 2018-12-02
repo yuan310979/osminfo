@@ -42,6 +42,10 @@ for key, data in zip(keys, grids):
 
 for key in tqdm(keys):
     grids[key] = osm.get_full_grid_data(key[0], key[1], step)
+
+print('========== Retry the error url before ===========')
+for key in osm.get_err_keys():
+    grids[key] = osm.get_full_grid_data(key[0], key[1], step)
     
 data_path = Path('../raw_data/')
 pickle_data_path = Path('../pickle_data/')

@@ -1,5 +1,6 @@
 import requests
 import re
+import pickle
 import multiprocessing as mp
 import pickle
 
@@ -8,13 +9,20 @@ from bs4 import BeautifulSoup
 from math import sin, cos, sqrt, atan2, radians
 from pprint import pprint as pp
 from typing import Tuple
+from time import sleep
 from pathlib import Path
 
 class OSMInfo:
 
     def __init__(self):
         self.nd_latlon = None
+        self.error_keys = []
         self.grids = None
+
+        log_path = Path('../log/error_log')
+        if not log_path.parent.exists():
+            log_path.parent.mkdir()
+        self.logf = log_path.open('w')
 
     def load_osm_grids_from_pickle(self, path='../pickle_data/TW_grids_full.pickle'):
         path = Path(path)
@@ -45,8 +53,18 @@ class OSMInfo:
             return 0.0
 
     def get_elements_by_grid(self, lat:float, lon:float, grid_size:float=0.01):
+        assert lat <= 90 and lat >= -90 and lon <= 180 and lon >= -180
         url = f'https://api.openstreetmap.org/api/0.6/map?bbox={lon},{lat},{lon+grid_size},{lat+grid_size}'
-        r = requests.get(url)
+
+        try:
+            r = requests.get(url)
+        except Exception as e:
+            self.logf.write(url + '\n')
+            self.error_keys.append((lat, lon))
+            sleep(10)
+            print(url)
+            return [], [], []
+
         soup = BeautifulSoup(r.text, 'xml')
         nodes = soup.find_all('node')
         ways = soup.find_all('way')
@@ -154,6 +172,8 @@ class OSMInfo:
 
 if __name__ == '__main__':
     osm = OSMInfo()
-    d = osm.latlon_distance(50.0359, 5.4253, 58.3838, 3.0412)
-    d = osm.get_roadnetwork_grid_data(120.90, 25.00, 0.01)
+    #  d = osm.latlon_distance(50.0359, 5.4253, 58.3838, 3.0412)
+    #  d = osm.get_roadnetwork_grid_data(120.90, 25.00, 0.01)
+    osm.load_osm_grids_from_pickle('../pickle_data/TW_grids_full.pickle')
+    d = osm.get_nearest_grid(lat=23.432342342, lon=121.12112)
     pp(d)
