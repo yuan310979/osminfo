@@ -31,7 +31,12 @@ class OSMInfo:
     def get_nearest_grid(self, lat, lon):
         lat = round(lat, 2)
         lon = round(lon, 2)
-        return self.grids[(lat, lon)]
+        try:
+            return self.grids[(lat, lon)]
+        except Exception as e:
+            error_msg = f'[Error]\t(get_nearest_grid)\tGrid ({lat}, {lon}) is not found.'
+            self.logf.write(error_msg + '\n')
+            print(error_msg)
 
     """
     def get_node_latlon(self, node_id: str) -> Tuple[float, float]:
