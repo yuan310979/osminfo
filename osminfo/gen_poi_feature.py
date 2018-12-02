@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from osminfo import OSMInfo
 from pprint import pprint as pp
+from tqdm import tqdm
 
 def save_pickle(path, obj):
     path = Path(path)
@@ -25,7 +26,7 @@ osm.load_osm_grids_from_pickle('../pickle_data/TW_grids_full.pickle')
 
 ret = {}
 
-for k, v in osm.grids.items():
+for k, v in tqdm(osm.grids.items()):
     poi_feature = [0] * 12
     for _, n in v['node'].items():
         if 'tag' in n:
