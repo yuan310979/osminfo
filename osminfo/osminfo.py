@@ -1,17 +1,29 @@
 import requests
 import re
 import multiprocessing as mp
+import pickle
 
 from tqdm import tqdm
 from bs4 import BeautifulSoup
 from math import sin, cos, sqrt, atan2, radians
 from pprint import pprint as pp
 from typing import Tuple
+from pathlib import Path
 
 class OSMInfo:
 
     def __init__(self):
         self.nd_latlon = None
+        self.grids = None
+
+    def load_osm_grids_from_pickle(self, path='../pickle_data/TW_grids_full.pickle'):
+        path = Path(path)
+        self.grids = pickle.load(Path(path).open('rb'))
+
+    def get_nearest_grid(self, lat, lon):
+        lat = round(lat, 2)
+        lon = round(lon, 2)
+        return self.grids[(lat, lon)]
 
     """
     def get_node_latlon(self, node_id: str) -> Tuple[float, float]:
