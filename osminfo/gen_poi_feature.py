@@ -1,4 +1,5 @@
 import pickle
+import os
 
 from pathlib import Path
 from osminfo import OSMInfo
@@ -14,7 +15,10 @@ def load_pickle(path):
     path = Path(path)
     return pickle.load(path.open('rb'))
 
-poi_mapping = load_pickle('../pickle_data/poi_mapping_dict.pickle')
+poi_mapping_path = '../pickle_data/poi_mapping_dict.pickle'
+if not Path(poi_mapping_path).exists():
+    os.system('python ./poi.py') 
+poi_mapping = load_pickle(poi_mapping_path)
 
 osm = OSMInfo()
 osm.load_osm_grids_from_pickle('../pickle_data/TW_grids_full.pickle')
