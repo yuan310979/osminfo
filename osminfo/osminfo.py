@@ -28,6 +28,9 @@ class OSMInfo:
         path = Path(path)
         self.grids = pickle.load(Path(path).open('rb'))
 
+    def get_err_keys(self):
+        return self.error_keys
+
     def get_nearest_grid(self, lat, lon):
         lat = round(lat, 2)
         lon = round(lon, 2)
