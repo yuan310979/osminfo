@@ -18,6 +18,7 @@ class OSMInfo:
         self.nd_latlon = None
         self.error_keys = []
         self.grids = None
+        self.nodes = None
 
         log_path = Path('../log/error_log')
         if not log_path.parent.exists():
@@ -27,6 +28,9 @@ class OSMInfo:
     def load_osm_grids_from_pickle(self, path='../pickle_data/TW_grids_full.pickle'):
         path = Path(path)
         self.grids = pickle.load(Path(path).open('rb'))
+
+    def import_nodes(self, nds):
+        self.nodes = nds
 
     def get_nearest_grid(self, lat, lon):
         lat = round(lat, 2)
@@ -46,6 +50,15 @@ class OSMInfo:
         lon = re.findall(r'lon=\"([^\"]*)\"', r.text)[0]
         return float(lat), float(lon)
     """
+
+    def get_way_length_by_dict(self, way):
+        nds = way['node']
+        if len(nds) > 1:
+            latlon = [ (float(self.nodes[id]['lat']), float(self.nodes[id]['lon'])) for id in nds ]
+            result_list = [self.latlon_distance(latlon[i][0], latlon[i][1], latlon[i+1][0], latlon[i+1][1]) for i in range(len(latlon)-1)]
+            return sum(result_list) 
+        else:
+            return 0.0
 
     def get_way_length(self, way_bs4):
         nds = way_bs4.find_all('nd')
