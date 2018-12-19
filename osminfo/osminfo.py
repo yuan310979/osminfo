@@ -32,6 +32,9 @@ class OSMInfo:
     def import_nodes(self, nds):
         self.nodes = nds
 
+    def get_err_keys(self):
+        return self.error_keys
+
     def get_nearest_grid(self, lat, lon):
         lat = round(lat, 2)
         lon = round(lon, 2)
