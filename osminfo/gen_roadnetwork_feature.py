@@ -21,14 +21,15 @@ def divide_ways_by_classes(cs, ways):
     for way_id, way_val in ways.items():
         if 'highway' in way_val['tag']:
             for idx, c in enumerate(cs):
-                if c == way_val['tag']['highway']:
-                    ret[idx].append(way_val)
+                for _c in c:
+                    if _c == way_val['tag']['highway']:
+                        ret[idx].append(way_val)
         else:
             ret[-1].append(way_val)
     return ret
                 
 osm = OSMInfo()
-osm.load_osm_grids_from_pickle('../pickle_data/TW_grids_full.pickle')
+osm.load_osm_grids_from_pickle('../pickle_data/BJ_grids_full.pickle')
 
 class1 = ['motorway', 'trunk', 'motorway_link', 'trunk_link']
 class2 = ['primary', 'secondary', 'tertiary', 'primary_link', 'secondary_link', 'tertiary_link']
