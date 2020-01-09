@@ -14,13 +14,11 @@ lon_range = 2
 lat_range = 3.5
 step = 0.01
 
-"""
-start_lon = 121.50
-start_lat = 25.00
-lon_range = 0.1
-lat_range = 0.1
-step = 0.01
-"""
+# start_lon = 121.50
+# start_lat = 25.00
+# lon_range = 0.1
+# lat_range = 0.01
+# step = 0.01
 
 grids = {}
 
@@ -47,8 +45,8 @@ print('========== Retry the error url before ===========')
 for key in osm.get_err_keys():
     grids[key] = osm.get_full_grid_data(key[0], key[1], step)
     
-data_path = Path('../raw_data/')
-pickle_data_path = Path('../pickle_data/')
+data_path = Path('./raw_data/')
+pickle_data_path = Path('./pickle_data/')
 TW_data_path = pickle_data_path / 'TW_grids_full.pickle'
 
 if not pickle_data_path.exists():

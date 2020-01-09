@@ -10,7 +10,7 @@ which means it is class 1 of 12 POI feature classes.
 import pickle
 
 from pathlib import Path
-from poi import POI
+from osminfo.poi import POI
 
 def save_pickle(path, obj):
     """

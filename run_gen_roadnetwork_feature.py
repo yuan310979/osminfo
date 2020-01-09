@@ -6,15 +6,7 @@ from osminfo import OSMInfo
 from pprint import pprint as pp
 from tqdm import tqdm
 
-def save_pickle(path, obj):
-    path = Path(path)
-    if not path.parent.exists():
-        path.parent.mkdir()
-    path.write_bytes(pickle.dumps(obj))
 
-def load_pickle(path):
-    path = Path(path)
-    return pickle.load(path.open('rb'))
 
 def divide_ways_by_classes(cs, ways):
     ret = [ [] for _ in range(len(cs)+1) ]
@@ -54,5 +46,3 @@ for k, v in tqdm(osm.grids.items()):
     ret[k]['length'] = (len_rf, len_rc, len_ro)
 
 save_pickle('../input_feature/road_network.pickle', ret)
-
-

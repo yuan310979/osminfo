@@ -1,0 +1,1 @@
+from .osminfo import OSMInfo
